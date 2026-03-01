@@ -132,15 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const showNotification = (med) => {
+    const showNotification = (med, isPreview = false) => {
         if (document.querySelector('.notification-overlay')) return;
 
         const overlay = document.createElement('div');
         overlay.className = 'notification-overlay fade-in';
         overlay.innerHTML = `
             <div class="med-icon" style="background: rgba(255,255,255,0.2); border-radius: 50%;"><i data-lucide="bell" style="width: 40px; height: 40px;"></i></div>
-            <div style="margin-top: 20px;">
-                <h2>¡Hora de tu medicina!</h2>
+            <div style="margin-top: 20px; text-align: center;">
+                <h2>${isPreview ? 'Vista Previa del Recordatorio' : '¡Hora de tu medicina!'}</h2>
                 <p style="font-size: 20px; font-weight: 700;">${med.name}</p>
                 <p style="font-size: 14px; opacity: 0.8;">${med.dose} • ${med.desc}</p>
             </div>
@@ -150,33 +150,34 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
             <div class="notification-actions">
-                <button class="notif-btn confirm" id="notif-confirm">TOMAR MEDICINA</button>
-                <button class="notif-btn postpone" id="notif-postpone">POSPONER 15 MIN</button>
-                <button class="notif-btn skip" id="notif-skip">OMITIR TOMA</button>
+                <button class="notif-btn confirm" id="notif-confirm">${isPreview ? 'CERRAR VISTA PREVIA' : 'TOMAR MEDICINA'}</button>
+                ${!isPreview ? `
+                    <button class="notif-btn postpone" id="notif-postpone">POSPONER 15 MIN</button>
+                    <button class="notif-btn skip" id="notif-skip">OMITIR TOMA</button>
+                ` : ''}
             </div>
         `;
         document.body.appendChild(overlay);
         lucide.createIcons();
 
         document.getElementById('notif-confirm').onclick = () => {
-            med.status = 'taken';
-            recordHistory(med, 'taken');
+            if (!isPreview) {
+                med.status = 'taken';
+                recordHistory(med, 'taken');
+            }
             overlay.remove();
-            navigateTo('home');
+            if (!isPreview) navigateTo('home');
         };
 
-        document.getElementById('notif-postpone').onclick = () => {
-            // Push same med 15 min later (logic simplified)
-            overlay.remove();
-            alert('Recordatorio pospuesto 15 minutos.');
-        };
-
-        document.getElementById('notif-skip').onclick = () => {
-            med.status = 'skipped';
-            recordHistory(med, 'skipped');
-            overlay.remove();
-            navigateTo('home');
-        };
+        if (!isPreview) {
+            document.getElementById('notif-postpone').onclick = () => { overlay.remove(); alert('Recordatorio pospuesto 15 minutos.'); };
+            document.getElementById('notif-skip').onclick = () => {
+                med.status = 'skipped';
+                recordHistory(med, 'skipped');
+                overlay.remove();
+                navigateTo('home');
+            };
+        }
     };
 
     setInterval(checkNotifications, 10000);
@@ -499,6 +500,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="settings-item-info"><i data-lucide="image"></i><span>Imagen de Recordatorio</span></div>
                     <i data-lucide="chevron-right" style="width: 16px; opacity: 0.5;"></i>
                 </div>
+                <div class="settings-item" id="preview-notif-trigger" style="cursor: pointer; border-left: 2px solid var(--primary); background: var(--bg-card); margin-top: -10px; border-radius: 0 0 12px 12px; margin-bottom: 20px;">
+                    <div class="settings-item-info"><i data-lucide="eye" style="color: var(--primary);"></i><span style="color: var(--primary); font-weight: 600;">Ver cómo queda mi imagen</span></div>
+                    <i data-lucide="chevron-right" style="width: 16px; color: var(--primary);"></i>
+                </div>
 
 
                 <h4 style="margin: 20px 0 10px;">Datos</h4>
@@ -513,6 +518,14 @@ document.addEventListener('DOMContentLoaded', () => {
             this.classList.toggle('active');
             userSettings.isDarkMode = this.classList.contains('active');
             document.body.classList.toggle('dark-mode', userSettings.isDarkMode);
+        };
+
+        document.getElementById('preview-notif-trigger').onclick = () => {
+            showNotification({
+                name: 'Tu Medicina',
+                dose: '1 Pastilla',
+                desc: 'Instrucciones de ejemplo'
+            }, true);
         };
 
         document.getElementById('save-settings').onclick = () => {
