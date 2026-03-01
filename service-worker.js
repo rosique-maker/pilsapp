@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pilsapp-v1';
+const CACHE_NAME = 'pilsapp-v' + Date.now(); // Dynamic version to force update
 const ASSETS = [
     './',
     './index.html',
@@ -37,4 +37,11 @@ self.addEventListener('fetch', (event) => {
             return response || fetch(event.request);
         })
     );
+});
+
+// Listener to force update when requested (via message)
+self.addEventListener('message', (event) => {
+    if (event.data === 'skipWaiting') {
+        self.skipWaiting();
+    }
 });
