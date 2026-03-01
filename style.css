@@ -463,99 +463,88 @@ body.dark-mode .status-dot {
     z-index: 100000 !important;
     display: flex !important;
     flex-direction: column !important;
-    background: #000 !important;
+    background: var(--primary) !important;
+    color: white !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
+    text-align: center !important;
 }
 
-.nurse-bg {
-    position: absolute !important;
-    inset: 0 !important;
-    background-image: url('nurse.png') !important;
-    background-size: cover !important;
-    background-position: center !important;
-    z-index: -1 !important;
-}
-
-.notif-top-spacer {
+.notif-header {
+    padding: 60px 20px 40px !important;
     flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
-.notif-med-display {
-    position: relative !important;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9)) !important;
-    padding: 80px 20px 20px !important;
-    z-index: 1 !important;
+.notif-header i {
+    width: 64px !important;
+    height: 64px !important;
+    margin-bottom: 24px !important;
+    opacity: 0.9 !important;
+}
+
+.notif-header h2 {
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    opacity: 0.8 !important;
+    margin-bottom: 8px !important;
 }
 
 .notif-med-name {
-    color: white !important;
-    font-size: 32px !important;
+    font-size: 36px !important;
     font-weight: 800 !important;
-    text-align: center !important;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+    line-height: 1.2 !important;
     font-family: 'Outfit', sans-serif !important;
 }
 
-.notif-nurse-footer {
-    position: relative !important;
+.notif-footer {
     background: white !important;
-    padding: 40px 20px calc(40px + env(safe-area-inset-bottom)) !important;
+    padding: 30px 24px calc(30px + env(safe-area-inset-bottom)) !important;
     border-radius: 32px 32px 0 0 !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important;
-    z-index: 2 !important;
-    box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.5) !important;
+    gap: 12px !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
 .notif-btn {
     width: 100% !important;
-    padding: 20px !important;
+    padding: 18px !important;
     border-radius: 16px !important;
-    font-size: 19px !important;
+    font-size: 18px !important;
     font-weight: 700 !important;
-    border: 1px solid #e2e8f0 !important;
     cursor: pointer !important;
+    border: none !important;
+    transition: transform 0.1s !important;
+    font-family: 'Inter', sans-serif !important;
     text-align: center !important;
     display: block !important;
-    font-family: 'Inter', sans-serif !important;
-    transition: transform 0.1s !important;
 }
 
 .notif-btn.confirm {
-    background: #f8fafc !important;
-    color: #0f172a !important;
+    background: var(--primary) !important;
+    color: white !important;
 }
 
 .notif-btn.postpone {
-    background: #f8fafc !important;
-    color: #0f172a !important;
+    background: #f1f5f9 !important;
+    color: #475569 !important;
 }
 
 .notif-btn.skip {
-    background: white !important;
-    color: #64748b !important;
-    border: none !important;
-    font-size: 16px !important;
+    background: transparent !important;
+    color: #94a3b8 !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
 }
 
 .notif-btn:active {
-    transform: scale(0.97) !important;
-}
-
-@keyframes zoomIn {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+    transform: scale(0.96) !important;
 }
 
 .unit-selector {
