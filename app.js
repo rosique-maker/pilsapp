@@ -500,14 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i data-lucide="chevron-right" style="width: 16px; opacity: 0.5;"></i>
                 </div>
 
-                <h4 style="margin: 20px 0 10px;">Avanzado</h4>
-                <div class="stat-card" style="padding: 20px;">
-                    <div class="form-group">
-                        <label>Google Cloud Sync URL (para seguimiento)</label>
-                        <input type="text" id="set-cloud-url" class="form-input" value="${userSettings.cloudSyncUrl || ''}" placeholder="https://script.google.com/macros/s/...">
-                        <p style="font-size: 10px; color: var(--text-muted); margin-top: 6px;">Pega aquí la URL de tu Web App de Google para recibir registros en tu Excel.</p>
-                    </div>
-                </div>
 
                 <h4 style="margin: 20px 0 10px;">Datos</h4>
                 <button class="export-btn" id="export-data" style="margin: 0;"><i data-lucide="download"></i> Exportar Historial (CSV)</button>
@@ -526,7 +518,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('save-settings').onclick = () => {
             userSettings.name = document.getElementById('set-name').value;
             userSettings.email = document.getElementById('set-email').value;
-            userSettings.cloudSyncUrl = document.getElementById('set-cloud-url').value.trim();
             saveData();
             updateHeaderProfile();
             alert('Ajustes guardados correctamente.');
