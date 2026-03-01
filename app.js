@@ -136,19 +136,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.querySelector('.notification-overlay')) return;
 
         const overlay = document.createElement('div');
-        overlay.className = 'notification-overlay fade-in';
+        overlay.className = 'notif24-overlay fade-in';
         overlay.innerHTML = `
-            <div class="notif-header">
+            <div class="notif24-header">
                 <i data-lucide="pill"></i>
                 <h2>¡Hora de tu medicina!</h2>
-                <div class="notif-med-name">${med.name}</div>
+                <div class="notif24-med-name">${med.name}</div>
                 <p style="margin-top: 10px; opacity: 0.7;">${med.dose} • ${med.desc}</p>
             </div>
 
-            <div class="notif-footer">
-                <button class="notif-btn confirm" id="notif-confirm">Confirmar Toma</button>
-                <button class="notif-btn postpone" id="notif-postpone">Posponer 30 min</button>
-                <button class="notif-btn skip" id="notif-skip">Omitir</button>
+            <div class="notif24-footer">
+                <button class="notif24-btn confirm" id="notif-confirm">Confirmar Toma</button>
+                <button class="notif24-btn postpone" id="notif-postpone">Posponer 30 min</button>
+                <button class="notif24-btn skip" id="notif-skip">Omitir</button>
             </div>
         `;
         document.body.appendChild(overlay);

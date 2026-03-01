@@ -455,12 +455,13 @@ body.dark-mode .status-dot {
 }
 
 /* Notification Overlay Styles */
-.notification-overlay {
+.notif24-overlay {
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    z-index: 100000 !important;
+    height: 100dvh !important;
+    z-index: 1000000 !important;
     display: flex !important;
     flex-direction: column !important;
     background: var(--primary) !important;
@@ -470,9 +471,11 @@ body.dark-mode .status-dot {
     overflow: hidden !important;
     box-sizing: border-box !important;
     text-align: center !important;
+    left: 0 !important;
+    top: 0 !important;
 }
 
-.notif-header {
+.notif24-header {
     padding: 60px 20px 40px !important;
     flex: 1 !important;
     display: flex !important;
@@ -481,28 +484,28 @@ body.dark-mode .status-dot {
     align-items: center !important;
 }
 
-.notif-header i {
+.notif24-header i {
     width: 64px !important;
     height: 64px !important;
     margin-bottom: 24px !important;
     opacity: 0.9 !important;
 }
 
-.notif-header h2 {
+.notif24-header h2 {
     font-size: 20px !important;
     font-weight: 500 !important;
     opacity: 0.8 !important;
     margin-bottom: 8px !important;
 }
 
-.notif-med-name {
+.notif24-med-name {
     font-size: 36px !important;
     font-weight: 800 !important;
     line-height: 1.2 !important;
     font-family: 'Outfit', sans-serif !important;
 }
 
-.notif-footer {
+.notif24-footer {
     background: white !important;
     padding: 30px 24px calc(30px + env(safe-area-inset-bottom)) !important;
     border-radius: 32px 32px 0 0 !important;
@@ -510,9 +513,11 @@ body.dark-mode .status-dot {
     flex-direction: column !important;
     gap: 12px !important;
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
-.notif-btn {
+.notif24-btn {
     width: 100% !important;
     padding: 18px !important;
     border-radius: 16px !important;
@@ -524,26 +529,27 @@ body.dark-mode .status-dot {
     font-family: 'Inter', sans-serif !important;
     text-align: center !important;
     display: block !important;
+    box-sizing: border-box !important;
 }
 
-.notif-btn.confirm {
+.notif24-btn.confirm {
     background: var(--primary) !important;
     color: white !important;
 }
 
-.notif-btn.postpone {
+.notif24-btn.postpone {
     background: #f1f5f9 !important;
     color: #475569 !important;
 }
 
-.notif-btn.skip {
+.notif24-btn.skip {
     background: transparent !important;
     color: #94a3b8 !important;
     font-size: 15px !important;
     font-weight: 500 !important;
 }
 
-.notif-btn:active {
+.notif24-btn:active {
     transform: scale(0.96) !important;
 }
 
