@@ -461,70 +461,101 @@ body.dark-mode .status-dot {
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--primary);
-    color: white;
-    z-index: 9999;
+    z-index: 9991;
     display: flex;
     flex-direction: column;
-    padding: 24px;
     box-sizing: border-box;
-    text-align: center;
-    justify-content: space-between;
     animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     overflow: hidden;
+    background: #000;
 }
 
-.notif-illustration {
+.nurse-bg {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
-    opacity: 0.4;
+    background-image: url('nurse.png');
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
 }
 
-.notif-illustration img {
+.notif-nurse-header {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
+    color: white;
+    text-align: center;
+}
+
+.notif-med-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.notif-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: white;
+    padding: 30px 20px 20px;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
     z-index: 1;
 }
 
-.notification-overlay .med-icon {
-    width: 80px;
-    height: 80px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 24px;
+.notif-nurse-footer {
+    position: relative;
+    background: white;
+    z-index: 2;
+    padding: 30px 20px;
+    border-radius: 32px 32px 0 0;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 24px;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.notification-overlay .med-icon i {
-    width: 40px;
-    height: 40px;
-}
-
-.notification-overlay h2 {
-    font-size: 28px;
+.notif-nurse-footer h2 {
+    color: #111;
+    font-size: 24px;
+    margin-bottom: 20px;
     font-family: 'Outfit', sans-serif;
-    margin-bottom: 8px;
 }
 
-.notification-overlay p {
+.notif-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
     font-size: 18px;
-    opacity: 0.9;
-    margin-bottom: 40px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.notif-btn.confirm {
+    background: #f8fafc;
+    color: #111;
+    border: 1px solid #ddd;
+}
+
+.notif-btn.postpone {
+    background: #f8fafc;
+    color: #111;
+    border: 1px solid #ddd;
+}
+
+.notif-btn.skip {
+    background: #f8fafc;
+    color: #111;
+    border: 1px solid #ddd;
+}
+
+.notif-btn:active {
+    transform: scale(0.95);
 }
 
 .notification-actions {

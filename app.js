@@ -138,30 +138,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.createElement('div');
         overlay.className = 'notification-overlay fade-in';
         overlay.innerHTML = `
-            ${userSettings.notifPic ? `
-                <div class="notif-illustration">
-                    <img src="${userSettings.notifPic}">
-                </div>
-            ` : ''}
+            <div class="nurse-bg"></div>
+            <div class="notif-med-name">${med.name}</div>
+            
+            <div style="flex: 1;"></div>
 
-            <div class="notif-content">
-                <div class="med-icon" style="background: rgba(255,255,255,0.2); border-radius: 50%;"><i data-lucide="bell" style="width: 40px; height: 40px;"></i></div>
-                <div style="margin-top: 20px; text-align: center;">
-                    <h2>${isPreview ? 'Vista Previa del Recordatorio' : '¡Hora de tu medicina!'}</h2>
-                    <p style="font-size: 20px; font-weight: 700;">${med.name}</p>
-                    <p style="font-size: 14px; opacity: 0.8;">${med.dose} • ${med.desc}</p>
-                </div>
-                ${!userSettings.notifPic ? `
-                    <div style="margin-top: 40px; opacity: 0.5;">
-                        <i data-lucide="pill" style="width: 80px; height: 80px;"></i>
-                    </div>
-                ` : ''}
-            </div>
-
-            <div class="notification-actions" style="z-index: 1;">
-                <button class="notif-btn confirm" id="notif-confirm">${isPreview ? 'TOMAR (SIMULAR)' : 'TOMAR MEDICINA'}</button>
-                <button class="notif-btn postpone" id="notif-postpone">POSPONER 15 MIN</button>
-                <button class="notif-btn skip" id="notif-skip">OMITIR TOMA</button>
+            <div class="notif-nurse-footer">
+                <button class="notif-btn confirm" id="notif-confirm">Confirmar</button>
+                <button class="notif-btn postpone" id="notif-postpone">Posponer 30 min</button>
+                <button class="notif-btn skip" id="notif-skip">Omitir</button>
             </div>
         `;
         document.body.appendChild(overlay);
@@ -177,8 +162,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         document.getElementById('notif-postpone').onclick = () => {
-            if (!isPreview) alert('Recordatorio pospuesto 15 minutos.');
-            overlay.remove();
+            if (!isPreview) {
+                overlay.remove();
+                alert('Recordatorio pospuesto 30 minutos.');
+                // Simulate postponement for now (full logic would require a background task)
+            } else {
+                overlay.remove();
+            }
         };
 
         document.getElementById('notif-skip').onclick = () => {
