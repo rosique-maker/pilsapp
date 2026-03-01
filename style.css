@@ -486,7 +486,7 @@ body.dark-mode .status-dot {
 .notif-med-display {
     position: relative !important;
     background: linear-gradient(transparent, rgba(0, 0, 0, 0.9)) !important;
-    padding: 60px 20px 20px !important;
+    padding: 80px 20px 20px !important;
     z-index: 1 !important;
 }
 
@@ -500,32 +500,50 @@ body.dark-mode .status-dot {
 }
 
 .notif-nurse-footer {
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    transition: var(--transition);
+    position: relative !important;
+    background: white !important;
+    padding: 40px 20px calc(40px + env(safe-area-inset-bottom)) !important;
+    border-radius: 32px 32px 0 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    z-index: 2 !important;
+    box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.notif-btn {
+    width: 100% !important;
+    padding: 20px !important;
+    border-radius: 16px !important;
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    border: 1px solid #e2e8f0 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    display: block !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: transform 0.1s !important;
 }
 
 .notif-btn.confirm {
-    background: white;
-    color: var(--primary);
+    background: #f8fafc !important;
+    color: #0f172a !important;
 }
 
 .notif-btn.postpone {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    backdrop-filter: blur(10px);
+    background: #f8fafc !important;
+    color: #0f172a !important;
 }
 
 .notif-btn.skip {
-    background: transparent;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 14px;
-    font-weight: 500;
+    background: white !important;
+    color: #64748b !important;
+    border: none !important;
+    font-size: 16px !important;
 }
 
 .notif-btn:active {
-    transform: scale(0.96);
+    transform: scale(0.97) !important;
 }
 
 @keyframes zoomIn {
