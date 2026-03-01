@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PilsApp - Tu Compañero de Salud</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Lucide Icons for a clean look -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- PWA Requirements -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063176.png">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <header class="app-header">
+                <h1 id="page-title">Hoy</h1>
+                <div class="user-status nav-item" data-page="settings" id="nav-settings-header"
+                    style="cursor: pointer;">
+                    <i data-lucide="user" style="width: 20px; color: var(--primary);"></i>
+                    <span class="status-dot online"></span>
+                </div>
+            </header>
+
+            <section id="content">
+                <!-- Content will be injected here -->
+                <div class="welcome-card">
+                    <h2>¡Hola!</h2>
+                    <p>Bienvenido a PilsApp. Vamos a configurar tu medicación.</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="home" id="nav-home">
+                <i data-lucide="calendar"></i>
+                <span>Hoy</span>
+            </button>
+            <button class="nav-item" data-page="meds" id="nav-meds">
+                <i data-lucide="pill"></i>
+                <span>Medicina</span>
+            </button>
+            <button class="nav-item action-btn" data-page="add" id="nav-add">
+                <div class="plus-icon">
+                    <i data-lucide="plus"></i>
+                </div>
+            </button>
+            <button class="nav-item" data-page="stats" id="nav-stats">
+                <i data-lucide="bar-chart-2"></i>
+                <span>Historial</span>
+            </button>
+            <button class="nav-item" data-page="vitals" id="nav-vitals">
+                <i data-lucide="activity"></i>
+                <span>Vitales</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('Service Worker registrado', reg))
+                    .catch(err => console.log('Error registrando Service Worker', err));
+            });
+        }
+    </script>
+</body>
+
+</html>
