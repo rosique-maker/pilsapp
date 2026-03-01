@@ -139,9 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.className = 'notification-overlay fade-in';
         overlay.innerHTML = `
             <div class="nurse-bg"></div>
-            <div class="notif-med-name">${med.name}</div>
-            
-            <div style="flex: 1;"></div>
+            <div class="notif-top-spacer"></div>
+            <div class="notif-med-display">
+                <div class="notif-med-name">${med.name}</div>
+            </div>
 
             <div class="notif-nurse-footer">
                 <button class="notif-btn confirm" id="notif-confirm">Confirmar</button>
