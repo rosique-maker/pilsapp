@@ -260,6 +260,12 @@ document.addEventListener('DOMContentLoaded', () => {
             else {
                 const dayHistory = history.filter(h => h.date === dateStr);
                 const dayMeds = medications.filter(m => {
+                    // Check if medication existed on this loopDate
+                    const startDate = m.startDate ? new Date(m.startDate) : null;
+                    if (startDate && loopDate < startDate && loopDate.toDateString() !== startDate.toDateString()) {
+                        return false;
+                    }
+
                     if (m.freq === 'daily') return true;
                     if (m.freq === 'weekly') {
                         const daysMap = { 0: 'D', 1: 'L', 2: 'M', 3: 'X', 4: 'J', 5: 'V', 6: 'S' };
@@ -323,6 +329,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const dayLabel = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(date);
 
         const dayMeds = medications.filter(m => {
+            // Check if medication existed on this date
+            const startDate = m.startDate ? new Date(m.startDate) : null;
+            if (startDate && date < startDate && date.toDateString() !== startDate.toDateString()) {
+                return false;
+            }
+
             if (m.freq === 'daily') return true;
             if (m.freq === 'weekly') {
                 const daysMap = { 0: 'D', 1: 'L', 2: 'M', 3: 'X', 4: 'J', 5: 'V', 6: 'S' };
@@ -886,9 +898,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            let originalStartDate = new Date().toDateString();
             if (editingMedId) {
                 const oldMed = medications.find(m => m.id === editingMedId);
                 if (oldMed) {
+                    if (oldMed.startDate) originalStartDate = oldMed.startDate;
                     // Remove all old records with the same name before saving new ones
                     medications = medications.filter(m => m.name !== oldMed.name);
                 }
@@ -907,7 +921,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     freq,
                     days,
                     daysOfMonth,
-                    period: parseInt(t.time.split(':')[0]) >= 12 ? 'PM' : 'AM'
+                    period: parseInt(t.time.split(':')[0]) >= 12 ? 'PM' : 'AM',
+                    startDate: originalStartDate
                 });
             });
 
