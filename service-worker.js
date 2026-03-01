@@ -5,7 +5,7 @@ const ASSETS = [
     './style.css',
     './app.js',
     'https://unpkg.com/lucide@latest',
-    'https://cdn-icons-png.flaticon.com/512/3063/3063176.png'
+    './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
