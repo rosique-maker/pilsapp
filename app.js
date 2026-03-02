@@ -543,6 +543,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span style="font-size: 13px; color: var(--text-muted);">Servicio Activo:</span>
                         <span id="sw-status-text" style="font-size: 13px; font-weight: 700; color: #64748B;">Cargando...</span>
                     </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">Último Latido:</span>
+                        <span id="sw-heartbeat-text" style="font-size: 13px; font-weight: 700; color: var(--primary);">--:--:--</span>
+                    </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                         <span style="font-size: 13px; color: var(--text-muted);">Medicinas en memoria:</span>
                         <span id="sw-med-count" style="font-size: 13px; font-weight: 700; color: var(--primary);">0</span>
@@ -592,6 +596,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Listen for status updates from SW
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'HEARTBEAT') {
+                    const statusText = document.getElementById('sw-status-text');
+                    const heartbeatText = document.getElementById('sw-heartbeat-text');
+                    const medCount = document.getElementById('sw-med-count');
+
+                    if (statusText) {
+                        statusText.textContent = 'Activo (Latido)';
+                        statusText.style.color = '#10B981';
+                    }
+                    if (heartbeatText) heartbeatText.textContent = event.data.pulse;
+                    if (medCount) medCount.textContent = event.data.medsCount;
+                }
+
                 if (event.data && event.data.type === 'STATUS_UPDATE') {
                     const statusText = document.getElementById('sw-status-text');
                     const medCount = document.getElementById('sw-med-count');

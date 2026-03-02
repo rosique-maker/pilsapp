@@ -1,22 +1,43 @@
-const CACHE_NAME = 'pilsapp-v' + Date.now(); // Persistence Fix v2.8
+const CACHE_NAME = 'pilsapp-v' + Date.now(); // Robust Heartbeat v2.9
 let swMedications = [];
 let swLastCheckedMinute = '';
+let swNotificationLog = {}; // { medId_date_time: true }
 
 // IndexedDB Persistence Logic
 const DB_NAME = 'pilsapp_sw_db';
 const STORE_NAME = 'meds_store';
+const LOG_STORE = 'notif_log';
 
 const openDB = () => {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 1);
+        const request = indexedDB.open(DB_NAME, 2); // Upgrade to v2 for log
         request.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 db.createObjectStore(STORE_NAME);
             }
+            if (!db.objectStoreNames.contains(LOG_STORE)) {
+                db.createObjectStore(LOG_STORE);
+            }
         };
         request.onsuccess = (e) => resolve(e.target.result);
         request.onerror = (e) => reject(e.target.error);
+    });
+};
+
+const saveLogToDB = async (log) => {
+    const db = await openDB();
+    const tx = db.transaction(LOG_STORE, 'readwrite');
+    tx.objectStore(LOG_STORE).put(log, 'history_log');
+};
+
+const loadLogFromDB = async () => {
+    const db = await openDB();
+    const tx = db.transaction(LOG_STORE, 'readonly');
+    const request = tx.objectStore(LOG_STORE).get('history_log');
+    return new Promise(r => {
+        request.onsuccess = () => r(request.result || {});
+        request.onerror = () => r({});
     });
 };
 
@@ -74,6 +95,9 @@ self.addEventListener('activate', (event) => {
             loadMedsFromDB().then(meds => {
                 swMedications = meds;
                 console.log('SW Activated: Meds loaded from DB', swMedications.length);
+            }),
+            loadLogFromDB().then(log => {
+                swNotificationLog = log;
             })
         ])
     );
@@ -112,55 +136,97 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 const checkSWNotifications = async () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMin = now.getMinutes();
+    const currentMinuteStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`;
+    const todayKey = now.toDateString();
+
+    // Heartbeat: used for diagnostics in the UI
+    const pulseTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
     // Force reload from DB if memory is empty
     if (swMedications.length === 0) {
         swMedications = await loadMedsFromDB();
     }
+    if (!swNotificationLog || Object.keys(swNotificationLog).length === 0) {
+        swNotificationLog = await loadLogFromDB();
+    }
+
     if (swMedications.length === 0) return;
-
-    const now = new Date();
-    const currentMinute = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    if (swLastCheckedMinute === currentMinute) return;
 
     // Check if any client is focused
     const clientList = await self.clients.matchAll({ type: 'window' });
     const isAppFocused = clientList.some(c => c.focused);
+
+    // Notify app of pulse (Heartbeat)
+    clientList.forEach(client => {
+        client.postMessage({
+            type: 'HEARTBEAT',
+            pulse: pulseTime,
+            medsCount: swMedications.length
+        });
+    });
+
     if (isAppFocused) return;
 
-    swLastCheckedMinute = currentMinute;
+    if (swLastCheckedMinute === currentMinuteStr) return;
+    swLastCheckedMinute = currentMinuteStr;
 
     const daysMap = { 0: 'D', 1: 'L', 2: 'M', 3: 'X', 4: 'J', 5: 'V', 6: 'S' };
     const today = daysMap[now.getDay()];
     const dateNum = now.getDate();
 
-    const dueMeds = swMedications.filter(m => {
-        if (m.status !== 'pending') return false;
-        if (m.time !== currentMinute) return false;
+    const dueMeds = swMedications.filter(med => {
+        if (med.status !== 'pending') return false;
 
-        if (m.freq === 'daily') return true;
-        if (m.freq === 'weekly') return (m.days || []).includes(today);
-        if (m.freq === 'monthly') {
-            const daysOfMonth = Array.isArray(m.daysOfMonth) ? m.daysOfMonth : [m.dayOfMonth];
+        // Tolerance Window Logic: Match if current time is within 5 minutes of scheduled time
+        const [scheduledH, scheduledM] = med.time.split(':').map(Number);
+        const scheduledTotalMins = (scheduledH * 60) + scheduledM;
+        const currentTotalMins = (currentHour * 60) + currentMin;
+
+        const diff = currentTotalMins - scheduledTotalMins;
+
+        // If we are within 0 to 5 minutes after the scheduled time
+        const isTimeMatch = diff >= 0 && diff < 5;
+        if (!isTimeMatch) return false;
+
+        if (med.freq === 'daily') return true;
+        if (med.freq === 'weekly') return (med.days || []).includes(today);
+        if (med.freq === 'monthly') {
+            const daysOfMonth = Array.isArray(med.daysOfMonth) ? med.daysOfMonth : [med.dayOfMonth];
             return daysOfMonth.includes(dateNum);
         }
         return false;
     });
 
+    let sentAny = false;
     dueMeds.forEach(med => {
+        // Anti-double-notification log
+        const logKey = `${med.id}_${todayKey}_${med.time}`;
+        if (swNotificationLog[logKey]) return; // Already notified today at this time
+
+        sentAny = true;
+        swNotificationLog[logKey] = true;
+
         self.registration.showNotification('¡Pilsapp: Hora de tu toma!', {
-            body: `Es hora de: ${med.name} (${med.dose}) ${med.desc ? ' • ' + med.desc : ''}`,
+            body: `Toma de las ${med.time}: ${med.name} (${med.dose}) ${med.desc ? ' • ' + med.desc : ''}`,
             icon: './icon-512.png',
             badge: './icon-512.png',
             data: { medId: med.id },
-            tag: `med-${med.id}-${currentMinute}`,
+            tag: `med-${med.id}`, // Constant tag per med so they overwrite if multiple fire
             renotify: true,
             vibrate: [200, 100, 200],
+            requireInteraction: true,
             actions: [
-                { action: 'open', title: 'Abrir App' }
+                { action: 'open', title: 'Ver Detalles' }
             ]
         });
     });
+
+    if (sentAny) {
+        saveLogToDB(swNotificationLog);
+    }
 };
 
 // Start the SW internal clock
