@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('pilsapp_history', JSON.stringify(history));
         localStorage.setItem('pilsapp_vitals', JSON.stringify(vitals));
         localStorage.setItem('pilsapp_settings', JSON.stringify(userSettings));
+        syncMedsToServiceWorker();
+    };
+
+    const syncMedsToServiceWorker = () => {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'SYNC_MEDS',
+                medications: medications
+            });
+        }
     };
 
     const loadData = () => {
@@ -40,6 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
             medications.forEach(m => m.status = 'pending');
             localStorage.setItem('pilsapp_last_login', todayStr);
             saveData();
+        } else {
+            syncMedsToServiceWorker(); // Sync even if no status reset
         }
 
         // Navigation Guard: Redirect to register if not completed
@@ -118,24 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const med = dueMeds[0];
             if (document.visibilityState === 'visible') {
                 showNotification(med);
-            } else {
-                // Background notification
-                if (Notification.permission === 'granted') {
-                    navigator.serviceWorker.ready.then(registration => {
-                        registration.showNotification('¡Pilsapp: Hora de tu toma!', {
-                            body: `Es hora de: ${med.name} (${med.dose})`,
-                            icon: './icon-512.png',
-                            badge: './icon-512.png',
-                            data: { medId: med.id },
-                            tag: 'medication-reminder',
-                            renotify: true,
-                            vibrate: [200, 100, 200]
-                        });
-                    });
-                } else {
-                    // Fallback to title flashing or something less aggressive if muted
-                    console.log('Notification permission not granted for background alert');
-                }
             }
         }
     };
@@ -147,8 +141,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
             checkNotifications();
+            syncMedsToServiceWorker(); // Use opportunity to re-sync
         }
     });
+
+    // Ensure sync when SW is ready
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(() => {
+            syncMedsToServiceWorker();
+        });
+    }
 
     const syncUserToCloud = async (userData) => {
         if (!userSettings.cloudSyncUrl) return;
