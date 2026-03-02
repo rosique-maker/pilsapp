@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pilsapp-v' + Date.now(); // Background Notifications v2.5
+const CACHE_NAME = 'pilsapp-v' + Date.now(); // Background Debug v2.6
 const ASSETS = [
     './',
     './index.html',
@@ -60,9 +60,22 @@ self.addEventListener('notificationclick', (event) => {
     );
 });
 
-// Listener to force update when requested (via message)
+// Listener to handle messages from the app
 self.addEventListener('message', (event) => {
     if (event.data === 'skipWaiting') {
         self.skipWaiting();
+    }
+
+    if (event.data && event.data.type === 'SCHEDULE_TEST_NOTIFICATION') {
+        setTimeout(() => {
+            self.registration.showNotification('🧪 Pilsapp: Prueba de Aviso', {
+                body: 'Si ves esto, las notificaciones funcionan en segundo plano. ¡Pulsa para abrir!',
+                icon: './icon-512.png',
+                badge: './icon-512.png',
+                tag: 'test-reminder',
+                renotify: true,
+                vibrate: [200, 100, 200]
+            });
+        }, event.data.delay || 5000);
     }
 });

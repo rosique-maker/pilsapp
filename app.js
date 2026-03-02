@@ -535,6 +535,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
 
                 <h4 style="margin: 20px 0 10px;">Aplicación</h4>
+                <div class="settings-item" id="test-notif-trigger" style="cursor: pointer; background: var(--primary-light); border-radius: 12px; margin-bottom: 20px;">
+                    <div class="settings-item-info"><i data-lucide="bell" style="color: var(--primary);"></i><span style="color: var(--primary); font-weight: 600;">Probar aviso en 5 seg (Salga de la app)</span></div>
+                    <i data-lucide="play" style="width: 16px; color: var(--primary);"></i>
+                </div>
                 <div class="settings-item">
                     <div class="settings-item-info"><i data-lucide="moon"></i><span>Modo Oscuro</span></div>
                     <div class="toggle-switch ${userSettings.isDarkMode ? 'active' : ''}" id="toggle-dark-mode"></div>
@@ -561,6 +565,23 @@ document.addEventListener('DOMContentLoaded', () => {
             this.classList.toggle('active');
             userSettings.isDarkMode = this.classList.contains('active');
             document.body.classList.toggle('dark-mode', userSettings.isDarkMode);
+        };
+
+        document.getElementById('test-notif-trigger').onclick = () => {
+            if (Notification.permission !== 'granted') {
+                alert('Primero debes permitir las notificaciones en tu móvil.');
+                requestNotificationPermission();
+                return;
+            }
+
+            alert('¡Vale! Ahora sal de la app o bloquea el móvil. En 5 segundos recibirás el aviso.');
+
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'SCHEDULE_TEST_NOTIFICATION',
+                    delay: 5000
+                });
+            }
         };
 
         document.getElementById('preview-notif-trigger').onclick = () => {
