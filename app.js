@@ -84,6 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
         saveData();
     };
 
+    const requestNotificationPermission = async () => {
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'default') {
+            await Notification.requestPermission();
+        }
+    };
+
     const checkNotifications = () => {
         const now = new Date();
         const currentMinute = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -107,8 +114,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         });
 
-        if (dueMeds.length > 0) showNotification(dueMeds[0]);
+        if (dueMeds.length > 0) {
+            const med = dueMeds[0];
+            if (document.visibilityState === 'visible') {
+                showNotification(med);
+            } else {
+                // Background notification
+                if (Notification.permission === 'granted') {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification('¡Pilsapp: Hora de tu toma!', {
+                            body: `Es hora de: ${med.name} (${med.dose})`,
+                            icon: './icon-512.png',
+                            badge: './icon-512.png',
+                            data: { medId: med.id },
+                            tag: 'medication-reminder',
+                            renotify: true,
+                            vibrate: [200, 100, 200]
+                        });
+                    });
+                } else {
+                    // Fallback to title flashing or something less aggressive if muted
+                    console.log('Notification permission not granted for background alert');
+                }
+            }
+        }
     };
+
+    // Call permission request early
+    requestNotificationPermission();
+
+    // Check notifications immediately when app returns to foreground
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            checkNotifications();
+        }
+    });
 
     const syncUserToCloud = async (userData) => {
         if (!userSettings.cloudSyncUrl) return;

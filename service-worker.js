@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pilsapp-v' + Date.now(); // Dynamic version to force update
+const CACHE_NAME = 'pilsapp-v' + Date.now(); // Background Notifications v2.5
 const ASSETS = [
     './',
     './index.html',
@@ -35,6 +35,27 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then((response) => {
             return response || fetch(event.request);
+        })
+    );
+});
+
+// Notification Click Handler
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            if (clientList.length > 0) {
+                let client = clientList[0];
+                for (let i = 0; i < clientList.length; i++) {
+                    if (clientList[i].focused) {
+                        client = clientList[i];
+                        break;
+                    }
+                }
+                return client.focus();
+            }
+            return clients.openWindow('./');
         })
     );
 });
