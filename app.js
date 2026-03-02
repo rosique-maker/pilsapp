@@ -537,6 +537,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
 
                 <h4 style="margin: 20px 0 10px;">Aplicación</h4>
+                <div class="stat-card" style="padding: 20px; margin-bottom: 20px; border: 1px solid var(--primary-light);">
+                    <h4 style="margin: 0 0 12px; font-size: 14px; color: var(--primary);">Estado del Ayudante (Segundo Plano)</h4>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">Servicio Activo:</span>
+                        <span id="sw-status-text" style="font-size: 13px; font-weight: 700; color: #64748B;">Cargando...</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                        <span style="font-size: 13px; color: var(--text-muted);">Medicinas en memoria:</span>
+                        <span id="sw-med-count" style="font-size: 13px; font-weight: 700; color: var(--primary);">0</span>
+                    </div>
+                    <button class="export-btn" id="resync-sw-btn" style="width: 100%; margin: 0; padding: 10px; font-size: 12px;">
+                        <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i> Re-sincronizar Memoria
+                    </button>
+                </div>
+
                 <div class="settings-item" id="test-notif-trigger" style="cursor: pointer; background: var(--primary-light); border-radius: 12px; margin-bottom: 20px;">
                     <div class="settings-item-info"><i data-lucide="bell" style="color: var(--primary);"></i><span style="color: var(--primary); font-weight: 600;">Probar aviso en 5 seg (Salga de la app)</span></div>
                     <i data-lucide="play" style="width: 16px; color: var(--primary);"></i>
@@ -568,6 +583,33 @@ document.addEventListener('DOMContentLoaded', () => {
             userSettings.isDarkMode = this.classList.contains('active');
             document.body.classList.toggle('dark-mode', userSettings.isDarkMode);
         };
+
+        document.getElementById('resync-sw-btn').onclick = () => {
+            syncMedsToServiceWorker();
+            alert('Memoria del Ayudante sincronizada.');
+        };
+
+        // Listen for status updates from SW
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'STATUS_UPDATE') {
+                    const statusText = document.getElementById('sw-status-text');
+                    const medCount = document.getElementById('sw-med-count');
+                    if (statusText) {
+                        statusText.textContent = event.data.status;
+                        statusText.style.color = '#10B981';
+                    }
+                    if (medCount) medCount.textContent = event.data.medsCount;
+                }
+            });
+
+            // Request initial status
+            setTimeout(() => {
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'GET_STATUS' });
+                }
+            }, 1000);
+        }
 
         document.getElementById('test-notif-trigger').onclick = () => {
             if (Notification.permission !== 'granted') {

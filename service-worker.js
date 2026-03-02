@@ -1,6 +1,46 @@
-const CACHE_NAME = 'pilsapp-v' + Date.now(); // Background Alarms v2.7
+const CACHE_NAME = 'pilsapp-v' + Date.now(); // Persistence Fix v2.8
 let swMedications = [];
 let swLastCheckedMinute = '';
+
+// IndexedDB Persistence Logic
+const DB_NAME = 'pilsapp_sw_db';
+const STORE_NAME = 'meds_store';
+
+const openDB = () => {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.target.error);
+    });
+};
+
+const saveMedsToDB = async (meds) => {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        store.put(meds, 'current_meds');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+};
+
+const loadMedsFromDB = async () => {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.get('current_meds');
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+    });
+};
 const ASSETS = [
     './',
     './index.html',
@@ -21,15 +61,21 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
+        Promise.all([
+            caches.keys().then((cacheNames) => {
+                return Promise.all(
+                    cacheNames.map((cacheName) => {
+                        if (cacheName !== CACHE_NAME) {
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+            }),
+            loadMedsFromDB().then(meds => {
+                swMedications = meds;
+                console.log('SW Activated: Meds loaded from DB', swMedications.length);
+            })
+        ])
     );
 });
 
@@ -66,6 +112,10 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 const checkSWNotifications = async () => {
+    // Force reload from DB if memory is empty
+    if (swMedications.length === 0) {
+        swMedications = await loadMedsFromDB();
+    }
     if (swMedications.length === 0) return;
 
     const now = new Date();
@@ -99,13 +149,16 @@ const checkSWNotifications = async () => {
 
     dueMeds.forEach(med => {
         self.registration.showNotification('¡Pilsapp: Hora de tu toma!', {
-            body: `Es hora de: ${med.name} (${med.dose})`,
+            body: `Es hora de: ${med.name} (${med.dose}) ${med.desc ? ' • ' + med.desc : ''}`,
             icon: './icon-512.png',
             badge: './icon-512.png',
             data: { medId: med.id },
             tag: `med-${med.id}-${currentMinute}`,
             renotify: true,
-            vibrate: [200, 100, 200]
+            vibrate: [200, 100, 200],
+            actions: [
+                { action: 'open', title: 'Abrir App' }
+            ]
         });
     });
 };
@@ -114,10 +167,24 @@ const checkSWNotifications = async () => {
 setInterval(checkSWNotifications, 30000);
 
 // Listener to handle messages from the app
-self.addEventListener('message', (event) => {
+self.addEventListener('message', async (event) => {
     if (event.data && event.data.type === 'SYNC_MEDS') {
         swMedications = event.data.medications || [];
-        console.log('SW: Medications synced', swMedications.length);
+        await saveMedsToDB(swMedications);
+        console.log('SW: Medications synced and saved to DB', swMedications.length);
+        checkSWNotifications(); // Immediate check
+    }
+
+    if (event.data && event.data.type === 'GET_STATUS') {
+        const client = await self.clients.get(event.source.id);
+        if (client) {
+            client.postMessage({
+                type: 'STATUS_UPDATE',
+                medsCount: swMedications.length,
+                lastCheck: swLastCheckedMinute,
+                status: 'Activo (Persistente)'
+            });
+        }
     }
 
     if (event.data === 'skipWaiting') {
