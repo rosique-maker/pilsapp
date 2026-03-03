@@ -76,7 +76,11 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js')
-                    .then(reg => console.log('Service Worker registrado', reg))
+                    .then(reg => {
+                        console.log('Service Worker registrado', reg);
+                        // Force update check on every reload
+                        reg.update();
+                    })
                     .catch(err => console.log('Error registrando Service Worker', err));
             });
         }

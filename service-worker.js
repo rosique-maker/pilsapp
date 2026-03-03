@@ -97,8 +97,9 @@ self.addEventListener('activate', (event) => {
                 console.log('SW Activated: Meds loaded from DB', swMedications.length);
             }),
             loadLogFromDB().then(log => {
-                swNotificationLog = log;
-            })
+                swNotificationLog = log || {};
+            }),
+            self.clients.claim() // Take control immediately
         ])
     );
 });

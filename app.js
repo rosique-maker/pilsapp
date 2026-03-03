@@ -595,6 +595,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Listen for status updates from SW
         if ('serviceWorker' in navigator) {
+            const updateSWStatus = () => {
+                const statusText = document.getElementById('sw-status-text');
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'GET_STATUS' });
+                } else if (statusText) {
+                    statusText.textContent = 'Inactivo (Recargar)';
+                    statusText.style.color = 'var(--danger)';
+                }
+            };
+
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data && event.data.type === 'HEARTBEAT') {
                     const statusText = document.getElementById('sw-status-text');
@@ -620,12 +630,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Request initial status
+            // Re-check if worker changes
+            navigator.serviceWorker.addEventListener('controllerchange', updateSWStatus);
+
+            // Initial request
+            setTimeout(updateSWStatus, 500);
             setTimeout(() => {
-                if (navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.controller.postMessage({ type: 'GET_STATUS' });
+                const statusText = document.getElementById('sw-status-text');
+                if (statusText && statusText.textContent === 'Cargando...') {
+                    statusText.textContent = 'Esperando al Ayudante...';
                 }
-            }, 1000);
+            }, 3000);
         }
 
         document.getElementById('test-notif-trigger').onclick = () => {
